@@ -1,218 +1,250 @@
-# MetaSafe Industrial
+<div align="center">
 
-Tableau de bord de maintenance prédictive pour un parc de machines industrielles.
-MetaSafe Industrial est une application web développée avec Streamlit. Elle analyse les données capteurs d'un parc de machines et estime, grâce à un modèle d'apprentissage automatique, la probabilité qu'une machine tombe en panne. L'objectif est d'anticiper les défaillances pour planifier la maintenance avant l'arrêt de production.
+<img src="./docs/assets/hero.svg" width="100%" alt="MetaSafe Industrial : tableau de bord et diagnostic prédictif des pannes de machines industrielles" />
 
-## 🎥 Démo vidéo
+<br/>
 
-▶️ **[Regarder la démo sur Google Drive](https://drive.google.com/drive/folders/1fHVSTtVsDsgb3VACNhxlLEXfmiarlOnJ?usp=sharing)**
+<img src="https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python" />
+<img src="https://img.shields.io/badge/Streamlit-FF4B4B?style=flat-square&logo=streamlit&logoColor=white" alt="Streamlit" />
+<img src="https://img.shields.io/badge/Plotly-3F4F75?style=flat-square&logo=plotly&logoColor=white" alt="Plotly" />
+<img src="https://img.shields.io/badge/pandas-150458?style=flat-square&logo=pandas&logoColor=white" alt="pandas" />
+<img src="https://img.shields.io/badge/NumPy-013243?style=flat-square&logo=numpy&logoColor=white" alt="NumPy" />
+<img src="https://img.shields.io/badge/SciPy-8CAAE6?style=flat-square&logo=scipy&logoColor=white" alt="SciPy" />
+<img src="https://img.shields.io/badge/Keycloak-SSO-4D4D4D?style=flat-square&logo=keycloak&logoColor=white" alt="Keycloak SSO" />
+<img src="https://img.shields.io/badge/Dataset-AI4I_2020-1a1545?style=flat-square" alt="AI4I 2020" />
 
-## Sommaire
+<br/><br/>
 
-- [Fonctionnalités](#fonctionnalités)
-- [Jeu de données](#jeu-de-données)
-- [Modèle de prédiction](#modèle-de-prédiction)
-- [Structure du projet](#structure-du-projet)
-- [Installation et lancement](#installation-et-lancement)
-- [Authentification Keycloak (optionnelle)](#authentification-keycloak-optionnelle)
-- [Ré-entraîner le modèle](#ré-entraîner-le-modèle)
-- [Dépannage](#dépannage)
-- [Technologies utilisées](#technologies-utilisées)
-- [Équipe du projet](#équipe-du-projet)
+**Capteurs → modèle Random Forest → probabilité de panne → action de maintenance**
 
-## Fonctionnalités
+*Projet de [Siwar Mrayhi](https://github.com/siwarmrayhi).*
 
-L'application est organisée en cinq pages, accessibles depuis le menu latéral.
+</div>
+
+<br/>
+
+<img src="./docs/assets/pipeline.svg" width="100%" alt="De la donnée au diagnostic : données, entraînement, modèle, authentification, dashboard, diagnostic" />
+
+---
+
+## 📌 Vue d'ensemble
+
+**MetaSafe Industrial** est un tableau de bord interactif de **maintenance prédictive** (application *Industrial AI Insights*), construit sur le jeu de données **AI4I 2020 Predictive Maintenance**.
+
+Il permet de :
+
+- **explorer** la santé d'un parc de machines (indicateurs, distributions, corrélations) ;
+- **comprendre** les cinq modes de défaillance et les variables qui les provoquent ;
+- **diagnostiquer** une machine : à partir de ses paramètres capteurs, un modèle **Random Forest** estime sa **probabilité de panne** et le tableau de bord recommande une action.
+
+L'accès à l'application est protégé par une **authentification unique (SSO) Keycloak**.
+
+## 🎬 Démonstration vidéo
+
+<div align="center">
+
+<!-- Remplacez VOTRE_LIEN_GOOGLE_DRIVE par le lien de votre vidéo -->
+<a href="VOTRE_LIEN_GOOGLE_DRIVE">
+  <img src="./docs/assets/demo.svg" width="100%" alt="Voir la vidéo de démonstration sur Google Drive" />
+</a>
+
+</div>
+
+## 📑 Sommaire
+
+- [Fonctionnalités](#-fonctionnalités)
+- [Pages de l'application](#-pages-de-lapplication)
+- [Modes de défaillance](#-modes-de-défaillance)
+- [Diagnostic prédictif](#-diagnostic-prédictif)
+- [Architecture](#-architecture)
+- [Authentification Keycloak](#-authentification-keycloak)
+- [Structure du projet](#-structure-du-projet)
+- [Installation et lancement](#-installation-et-lancement)
+- [Limites et pistes d'amélioration](#-limites-et-pistes-damélioration)
+- [Technologies utilisées](#-technologies-utilisées)
+
+---
+
+## ✨ Fonctionnalités
+
+| | Fonctionnalité | Ce qu'elle apporte |
+|:-:|---|---|
+| 🏭 | **Indicateurs du parc** | Parc total, pannes, disponibilité, usure moyenne des outils et couple moyen, avec filtre par type de machine (L / M / H). |
+| 📊 | **Analyse des capteurs** | Histogrammes, courbes de densité (KDE), box plots et violons comparant les machines saines et en panne, avec le **d de Cohen** comme mesure du pouvoir discriminant. |
+| 🔬 | **Analyse multivariée** | Matrice de corrélation, carte des zones de stress mécanique (couple et vitesse), différence de température et puissance mécanique. |
+| ⚠️ | **Modes de défaillance** | Tableau de synthèse et analyse approfondie de chacun des cinq modes (TWF, HDF, PWF, OSF, RNF), avec explication métier. |
+| 🤖 | **Diagnostic prédictif** | Saisie de six paramètres, jauge de probabilité de panne, verdict à trois niveaux et facteurs de risque détaillés. |
+| 🔐 | **SSO Keycloak** | Connexion OAuth2 / OIDC, rôle de l'utilisateur affiché dans l'application, déconnexion qui invalide la session côté serveur. |
+| 🌙 | **Interface soignée** | Thème sombre, palette cohérente (vert sain, orange alerte, rouge panne) et encadrés d'interprétation générés automatiquement. |
+
+---
+
+## 🧭 Pages de l'application
+
+Cinq pages, accessibles depuis le menu latéral. Les filtres globaux (type de machine) s'appliquent aux quatre pages d'analyse.
 
 | Page | Contenu |
 |---|---|
-| **Vue d'ensemble** | Indicateurs clés (parc surveillé, nombre de pannes, disponibilité, usure et couple moyens), répartition sain / panne, pannes par qualité de machine, décomposition des modes de défaillance. |
-| **Distributions** | Pour chaque variable capteur : histogramme, densité lissée (KDE), boîte à moustaches et distribution par qualité de machine. Calcul du pouvoir discriminant de la variable (d de Cohen). |
-| **Analyse multivariée** | Matrice de corrélation, carte des zones de contrainte mécanique (vitesse × couple), écart de température process – air, puissance mécanique. |
-| **Modes de défaillance** | Synthèse des 5 modes de panne, analyse détaillée d'un mode (profil moyen des machines concernées, écarts relatifs) et recommandations de maintenance. |
-| **Diagnostic prédictif** | Saisie des mesures d'une machine, probabilité de défaillance calculée par le modèle, verdict (conforme / risque modéré / risque élevé) et analyse des facteurs de risque. |
+| **🏠 Vue d'ensemble** | Cinq indicateurs clés, répartition sain / panne, taux de panne par type de machine, décomposition des modes de défaillance. |
+| **📊 Distribution & comportement** | Choix d'une variable capteur : statistiques comparées, histogramme, courbe de densité, box plot et violon par type. |
+| **🔬 Analyse multivariée** | Corrélations de Pearson, zones de stress mécanique, ΔT (process − air) et puissance mécanique. |
+| **⚠️ Modes de défaillance** | Synthèse des cinq modes, profil moyen des machines en panne pour le mode choisi, explication et action recommandée. |
+| **🤖 Diagnostic prédictif** | Formulaire de saisie, jauge de risque, verdict, analyse des facteurs de risque et comparaison avec la moyenne du parc. |
 
-Autres fonctionnalités :
+---
 
-- Filtre global par qualité de machine (L, M, H) appliqué à toutes les pages d'analyse.
-- Encadrés d'interprétation générés automatiquement à partir des données.
-- Authentification SSO via Keycloak, avec gestion des rôles (Administrateur, Analyste, Opérateur). Sans configuration, l'application démarre en mode local.
-- Interface sombre et sobre, adaptée à un usage en salle de supervision.
+## 🔥 Modes de défaillance
 
+Le jeu de données AI4I 2020 distingue cinq modes de panne. L'application les analyse un par un et s'appuie sur leurs seuils pour expliquer le risque d'une machine.
 
+<div align="center">
+<img src="./docs/assets/modes.svg" width="100%" alt="TWF usure de l'outil, HDF dissipation de chaleur, PWF surcharge énergétique, OSF sur-contrainte, RNF panne aléatoire" />
+</div>
 
-## Jeu de données
+---
 
-Le projet utilise le jeu de données public **AI4I 2020 Predictive Maintenance Dataset** (UCI Machine Learning Repository), fourni dans le fichier `ai4i2020.csv`.
+## 🤖 Diagnostic prédictif
 
-- 10 000 observations, une par machine.
-- 339 pannes (3,39 %) : les classes sont fortement déséquilibrées.
+La page de diagnostic transforme les mesures d'une machine en une **probabilité de défaillance**, estimée par un modèle **Random Forest** entraîné sur AI4I 2020.
 
-| Variable | Description |
+**Entrées**
+
+| Paramètre | Plage proposée |
 |---|---|
-| `Type` | Qualité de la machine : L (Low, 60 %), M (Medium, 30 %), H (High, 10 %) |
-| `Air temperature [K]` | Température de l'air ambiant |
-| `Process temperature [K]` | Température du procédé |
-| `Rotational speed [rpm]` | Vitesse de rotation (tr/min) |
-| `Torque [Nm]` | Couple (N·m) |
-| `Tool wear [min]` | Usure de l'outil (minutes) |
-| `Machine failure` | Variable cible : 1 si la machine est en panne |
+| Type de machine | L (Low), M (Medium), H (High quality) |
+| Température de l'air | 295 – 305 K |
+| Température du process | 305 – 315 K |
+| Vitesse de rotation | 1000 – 3000 RPM |
+| Couple | 0 – 80 Nm |
+| Usure de l'outil | 0 – 300 min |
 
-Une panne peut avoir une ou plusieurs causes, appelées modes de défaillance :
+**Sortie** : une jauge de probabilité de panne et un verdict.
 
-| Code | Mode | Condition de déclenchement |
-|---|---|---|
-| TWF | Usure de l'outil | Usure comprise entre 200 et 240 min |
-| HDF | Dissipation de chaleur | Écart process – air < 8,6 K et vitesse < 1 380 tr/min |
-| PWF | Défaut de puissance | Puissance mécanique hors de la plage 3 500 – 9 000 W |
-| OSF | Surcontrainte | Couple × usure > 11 000 (L), 12 000 (M) ou 13 000 (H) |
-| RNF | Panne aléatoire | Environ 0,1 % de probabilité, sans cause identifiable |
+| Probabilité | Verdict | Action recommandée |
+|:-:|---|---|
+| < 30 % | ✅ Machine opérationnelle | Maintenir la surveillance standard. |
+| 30 – 60 % | ⚠️ Risque modéré | Renforcer le monitoring, planifier une inspection. |
+| ≥ 60 % | 🚨 Risque élevé | Programmer immédiatement une intervention de maintenance. |
 
-## Modèle de prédiction
+L'application affiche aussi un **risque par facteur** (usure d'outil, dissipation de chaleur, surcharge énergétique, sur-contrainte) pour indiquer ce qui menace le plus la machine.
 
-Le modèle est entraîné dans le notebook `entrainement.ipynb`.
+---
 
-- **Préparation** : encodage de la qualité de machine (`LabelEncoder`). Les identifiants (`UDI`, `Product ID`) et les colonnes de modes de panne sont retirés, pour que le modèle n'apprenne pas directement la réponse.
-- **Variables d'entrée** : qualité, température air, température process, vitesse de rotation, couple, usure outil.
-- **Découpage** : 80 % entraînement (8 000 lignes) / 20 % test (2 000 lignes), stratifié sur la cible.
-- **Rééquilibrage** : SMOTE, appliqué uniquement sur les données d'entraînement. Il crée des pannes synthétiques pour atteindre un équilibre 50 / 50.
-- **Algorithme** : Random Forest (100 arbres).
+## 🧱 Architecture
 
-Résultats sur l'ensemble de test, tels qu'ils figurent dans le notebook :
+<div align="center">
+<img src="./docs/assets/architecture.svg" width="100%" alt="Architecture : utilisateur, Keycloak, Streamlit, modèle, encodeur et jeu de données" />
+</div>
 
-| Classe | Précision | Rappel | F1-score |
-|---|---|---|---|
-| Sain | 0,99 | 0,97 | 0,98 |
-| Panne | 0,43 | 0,72 | 0,54 |
-| **Exactitude globale** | | | **0,96** |
+L'application Streamlit charge une seule fois, au démarrage, trois ressources : le **modèle** Random Forest, l'**encodeur** du type de machine et le **jeu de données**. L'utilisateur ne voit l'application qu'après s'être authentifié auprès du serveur Keycloak.
 
-Le modèle détecte environ 72 % des pannes réelles. En contrepartie, il produit un certain nombre de fausses alertes, ce qui reste acceptable en maintenance préventive : une inspection inutile coûte moins cher qu'un arrêt imprévu.
+---
 
-Le modèle et l'encodeur sont enregistrés dans `modele_maintenance_predictive.pkl` et `label_encoder_type.pkl`, puis chargés par l'application.
+## 🔐 Authentification Keycloak
 
-## Structure du projet
+L'authentification repose sur **Keycloak** (OAuth2 / OIDC) via la bibliothèque `streamlit-keycloak`. Tant que l'utilisateur n'est pas connecté, le reste de l'application ne se charge pas.
 
+Le rôle affiché dans l'application est déduit du champ `roles` renvoyé par Keycloak :
+
+| Rôle Keycloak | Rôle affiché |
+|---|---|
+| `admin` | Administrateur |
+| `analyste` | Analyste |
+| autre | Opérateur |
+
+<details>
+<summary><b>Configuration des secrets</b></summary>
+
+<br/>
+
+L'application lit trois valeurs dans les secrets Streamlit :
+
+```toml
+[keycloak]
+url = "https://ton-serveur-keycloak.com"
+realm = "industrial-realm"
+client_id = "industrial-ai-insights"
 ```
+
+Un modèle est fourni dans `secrets_template.toml`. En local, placez ce contenu dans `.streamlit/secrets.toml`. Sur Streamlit Community Cloud, ajoutez-le dans **Settings > Secrets** de l'application.
+
+Sans cette configuration, l'application affiche un message d'erreur explicite et s'arrête.
+
+</details>
+
+---
+
+## 📁 Structure du projet
+
+```text
 MetaSafe-Industrial/
-├── app_auth.py                        Application Streamlit (5 pages)
-├── entrainement.ipynb                 Notebook d'analyse et d'entraînement du modèle
-├── ai4i2020.csv                       Jeu de données AI4I 2020
+├── app_auth.py                        Application Streamlit (authentification + dashboard)
+├── entrainement.ipynb                 Notebook d'entraînement du modèle
 ├── modele_maintenance_predictive.pkl  Modèle Random Forest entraîné
-├── label_encoder_type.pkl             Encodeur de la qualité de machine (L / M / H)
-├── requirements.txt                   Dépendances Python
+├── label_encoder_type.pkl             Encodeur du type de machine (L / M / H)
+├── ai4i2020.csv                       Jeu de données AI4I 2020
 ├── secrets_template.toml              Modèle de configuration Keycloak
-├── .streamlit/
-│   └── config.toml                    Thème de l'interface
-├── docs/
-│   └── screenshots/                   Captures d'écran utilisées dans ce README
-├── .gitignore
-└── README.md
+├── requirements.txt                   Dépendances Python
+└── docs/
+    └── assets/                        Visuels de ce README
 ```
 
-## Installation et lancement
+---
+
+## 🚀 Installation et lancement
 
 ### Prérequis
 
-Python 3.10 à 3.13 (Python 3.12 est recommandé). Sous Windows, cochez « Add Python to PATH » pendant l'installation.
+- Python 3
+- Un serveur **Keycloak** accessible, avec un realm et un client configurés pour l'application
+- Les rôles `admin` et `analyste` dans Keycloak, exposés dans le champ `roles` des informations utilisateur (sinon l'utilisateur est considéré comme Opérateur)
 
-### Première installation
-
-Ouvrez un terminal dans le dossier du projet, puis exécutez les commandes suivantes.
-
-**Windows**
+### Lancement en local
 
 ```bash
-python -m venv .venv
-.venv\Scripts\activate
+git clone https://github.com/siwarmrayhi/MetaSafe-Industrial.git
+cd MetaSafe-Industrial
+
+python -m venv venv
+source venv/bin/activate         # Windows : venv\Scripts\activate
 pip install -r requirements.txt
-streamlit run app_auth.py
 ```
 
-**macOS / Linux**
+Configurez ensuite les secrets Keycloak (voir [Authentification Keycloak](#-authentification-keycloak)), puis lancez l'application :
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
 streamlit run app_auth.py
 ```
 
-L'application s'ouvre automatiquement dans le navigateur à l'adresse http://localhost:8501.
+L'application s'ouvre dans le navigateur et redirige vers la page de connexion Keycloak.
 
-### Lancements suivants
+---
 
-```bash
-.venv\Scripts\activate          # macOS / Linux : source .venv/bin/activate
-streamlit run app_auth.py
-```
+## 🚧 Limites et pistes d'amélioration
 
-Pour arrêter l'application, appuyez sur `Ctrl + C` dans le terminal.
-
-## Authentification Keycloak (optionnelle)
-
-Sans configuration, l'application démarre en mode local : l'accès est direct, sans connexion. Pour activer l'authentification SSO :
-
-1. Copiez `secrets_template.toml` vers `.streamlit/secrets.toml`.
-2. Renseignez les valeurs de votre serveur :
-
-   ```toml
-   [keycloak]
-   url       = "https://auth.mon-entreprise.com"
-   realm     = "industrial-realm"
-   client_id = "industrial-ai-insights"
-   ```
-
-3. Dans la console d'administration Keycloak, configurez le client :
-   - type OpenID Connect, authentification client désactivée (client public) ;
-   - Valid redirect URIs : `http://localhost:8501/*` ;
-   - Web origins : `http://localhost:8501`.
-4. Créez les rôles de realm et attribuez-les aux utilisateurs :
-
-   | Rôle Keycloak | Rôle dans l'application |
-   |---|---|
-   | `admin` | Administrateur |
-   | `analyste` | Analyste |
-   | aucun des deux | Opérateur |
-
-Sur Streamlit Community Cloud, collez le même contenu dans **Settings → Secrets** de l'application.
-
-> ⚠️ Le fichier `.streamlit/secrets.toml` contient des informations sensibles : il est exclu du dépôt par le `.gitignore` et ne doit jamais être publié.
-
-## Ré-entraîner le modèle
-
-1. Installez les dépendances supplémentaires :
-
-   ```bash
-   pip install jupyter seaborn matplotlib imbalanced-learn
-   ```
-
-2. Ouvrez le notebook :
-
-   ```bash
-   jupyter notebook entrainement.ipynb
-   ```
-
-3. Exécutez toutes les cellules. Les fichiers `modele_maintenance_predictive.pkl` et `label_encoder_type.pkl` sont régénérés dans le dossier du projet.
-
-Si vous changez la version de scikit-learn, mettez aussi à jour la ligne correspondante dans `requirements.txt`, pour que l'application charge le modèle avec la même version que celle de l'entraînement.
-
-## Dépannage
-
-| Problème | Solution |
+| Limite | Piste |
 |---|---|
-| `python` n'est pas reconnu | Réinstallez Python en cochant « Add Python to PATH », ou utilisez `py` à la place de `python`. |
-| `streamlit` n'est pas reconnu | L'environnement virtuel n'est pas activé : exécutez `.venv\Scripts\activate`. |
-| Erreur lors de l'installation de scikit-learn | Votre version de Python est trop récente. Installez Python 3.12. |
-| Le port 8501 est déjà utilisé | Lancez l'application sur un autre port : `streamlit run app_auth.py --server.port 8502`. |
-| Erreur de chargement des ressources | Vérifiez que les fichiers `.pkl` et `ai4i2020.csv` sont bien dans le même dossier que `app_auth.py`. |
+| AI4I 2020 est un jeu de données **synthétique** : les résultats ne garantissent pas les mêmes performances sur des machines réelles. | Valider et réentraîner le modèle sur des données de terrain. |
+| Le rôle de l'utilisateur est affiché, mais ne restreint pas encore l'accès aux pages. | Limiter certaines pages ou actions selon le rôle Keycloak. |
+| Le diagnostic porte sur une machine saisie à la main. | Alimenter le diagnostic en continu par des capteurs ou un flux de données. |
 
-## Technologies utilisées
+---
 
-- **Streamlit** : interface web
-- **Plotly** : graphiques interactifs
-- **pandas, NumPy, SciPy** : traitement des données et statistiques
-- **scikit-learn** : modèle Random Forest
-- **imbalanced-learn** : rééquilibrage SMOTE (entraînement uniquement)
-- **streamlit-keycloak** : authentification SSO
+## 🧰 Technologies utilisées
 
+<div align="center">
+<img src="./docs/assets/tech.svg" width="100%" alt="Streamlit, Plotly, pandas, NumPy, SciPy, joblib, Keycloak, streamlit-keycloak" />
+</div>
 
+---
+
+<div align="center">
+
+## 👩‍💻 Auteure
+
+**Siwar Mrayhi**
+
+<a href="https://github.com/siwarmrayhi"><img src="https://img.shields.io/badge/GitHub-siwarmrayhi-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a>
+<a href="https://linkedin.com/in/siwar-mrayhi"><img src="https://img.shields.io/badge/LinkedIn-Siwar_Mrayhi-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a>
+
+</div>
