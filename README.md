@@ -44,7 +44,7 @@ L'accès à l'application est protégé par une **authentification unique (SSO) 
 <div align="center">
 
 <!-- Remplacez VOTRE_LIEN_GOOGLE_DRIVE par le lien de votre vidéo -->
-<a href="VOTRE_LIEN_GOOGLE_DRIVE">
+<a href="https://drive.google.com/drive/folders/1fHVSTtVsDsgb3VACNhxlLEXfmiarlOnJ?usp=drive_link">
   <img src="./docs/assets/demo.svg" width="100%" alt="Voir la vidéo de démonstration sur Google Drive" />
 </a>
 
